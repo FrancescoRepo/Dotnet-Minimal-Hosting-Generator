@@ -1,8 +1,9 @@
-dotnet tool uninstall minimalhmgenerator
+dotnet tool uninstall  minimalhmgenerator --global
 dotnet nuget locals all --clear
 cd DotnetMinimalHostingModelGenerator/nupkg
 rm -rf *
 cd ../
 dotnet pack --configuration Release
 cd ..
-dotnet tool install --add-source ./DotnetMinimalHostingModelGenerator/nupkg MinimalHMGenerator
+dotnet tool install --global --add-source ./DotnetMinimalHostingModelGenerator/nupkg MinimalHMGenerator
+dotnet restore

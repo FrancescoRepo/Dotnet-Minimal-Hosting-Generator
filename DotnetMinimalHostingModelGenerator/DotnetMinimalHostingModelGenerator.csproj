@@ -12,6 +12,11 @@
         <Version>0.1.0</Version>
         <Authors>Francesco Colaianni</Authors>
         <PackageId>MinimalHMGenerator</PackageId>
+        <Title>Dotnet-Minimal-Hosting-Model-Generator</Title>
+        <Description>Generates a new "Program.cs" file with the new minimal hosting model started from .NET6, by taking in input a "Startup.cs" file</Description>
+        <Copyright>Copyright (c) 2024 Francesco Colaianni</Copyright>
+        <PackageLicenseUrl>https://github.com/FrancescoRepo/Dotnet-Minimal-Hosting-Generator/blob/master/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/FrancescoRepo/Dotnet-Minimal-Hosting-Generator</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>

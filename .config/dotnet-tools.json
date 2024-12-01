@@ -1,12 +1,5 @@
 {
   "version": 1,
   "isRoot": true,
-  "tools": {
-    "minimalhmgenerator": {
-      "version": "0.1.0",
-      "commands": [
-        "minimal-hm-generator"
-      ]
-    }
-  }
+  "tools": {}
 }
