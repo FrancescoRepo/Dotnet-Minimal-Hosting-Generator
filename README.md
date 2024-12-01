@@ -81,7 +81,7 @@ Running the tool successfully will output a message like:
 Successfully transformed ./Startup.cs
 ```
 
-The new `Program.cs` file will be located in the specified output directory.
+The generated file will be called "NewProgram.cs" and will be located in the specified output directory.
 
 ---
 
