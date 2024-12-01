@@ -3,7 +3,7 @@ dotnet nuget locals all --clear
 cd DotnetMinimalHostingModelGenerator/nupkg
 rm -rf *
 cd ../
+dotnet build --configuration Release
 dotnet pack --configuration Release
-cd ..
-dotnet tool install --global --add-source ./DotnetMinimalHostingModelGenerator/nupkg MinimalHMGenerator
+dotnet tool install --global --add-source ./nupkg MinimalHMGenerator
 dotnet restore

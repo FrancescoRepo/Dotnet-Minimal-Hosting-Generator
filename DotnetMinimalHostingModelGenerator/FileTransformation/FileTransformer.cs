@@ -17,81 +17,96 @@ internal static class FileTransformer
     /// <returns></returns>
     internal static bool TransformFile(FileInfo inputFilePath, string outputFilePath)
     {
-        Console.WriteLine($"Processing file: {inputFilePath.FullName}");
-
-        var csFilePath = inputFilePath.FullName;
-        var csFileContent = File.ReadAllText(csFilePath);
-        var tree = CSharpSyntaxTree.ParseText(csFileContent);
-        var root = tree.GetCompilationUnitRoot();
-        var usings = root.Usings;
-        var nds = (NamespaceDeclarationSyntax)root.Members[0];
-
-        var outputFile = usings.Select(usingDirective => usingDirective.ToString()).ToList();
-        outputFile.Add("var builder = WebApplication.CreateBuilder(args);");
-
-        var startupClassDs =
-            (ClassDeclarationSyntax?)nds.Members.FirstOrDefault(n => n is ClassDeclarationSyntax
-            {
-                Identifier.ValueText: "Startup"
-            });
-        
-        if (startupClassDs is null)
+        try
         {
-            Console.Error.WriteLine("No Startup class found.");
-            return false;
-        }
+            Console.WriteLine($"Processing file: {inputFilePath.FullName}");
 
-        // Transform the startup class to the new hosting model
-        foreach (var ds in startupClassDs.Members)
-        {
-            switch (ds)
+            var csFilePath = inputFilePath.FullName;
+            var csFileContent = File.ReadAllText(csFilePath);
+            var tree = CSharpSyntaxTree.ParseText(csFileContent);
+            var root = tree.GetCompilationUnitRoot();
+            var usings = root.Usings;
+            var nds = (NamespaceDeclarationSyntax)root.Members[0];
+
+            var outputFile = usings.Select(usingDirective => usingDirective.ToString()).ToList();
+            outputFile.Add("");
+            outputFile.Add("var builder = WebApplication.CreateBuilder(args);");
+
+            var startupClassDs =
+                (ClassDeclarationSyntax?)nds.Members.FirstOrDefault(n => n is ClassDeclarationSyntax
+                {
+                    Identifier.ValueText: "Startup"
+                });
+
+            if (startupClassDs is null)
             {
-                case MethodDeclarationSyntax mds:
+                Console.Error.WriteLine("No Startup class found.");
+                return false;
+            }
+
+            // Transform the startup class to the new hosting model
+            foreach (var ds in startupClassDs.Members)
+            {
+                switch (ds)
                 {
-                    var methodName = mds.Identifier.ValueText;
-                    var methodBody = mds.Body?.ToString();
-                    if (string.IsNullOrWhiteSpace(methodName)) continue;
-                    if (methodBody == null) continue;
-
-                    switch (methodName)
+                    case MethodDeclarationSyntax mds:
                     {
-                        case ConfigureServicesMethodName:
-                            methodBody = methodBody.Replace("services", "builder.Services")
-                                .Replace("Configuration", "builder.Configuration").TrimStart('{').TrimEnd('}');
-                            outputFile.Add(methodBody);
-                            break;
-                        case ConfigureMethodName:
-                            outputFile.Add("var app = builder.Build();");
-                            outputFile.Add(methodBody.Replace("env.", "app.Environment.").TrimStart('{').TrimEnd('}'));
-                            outputFile.Add("app.Run();");
-                            break;
-                        //Copy all the remaining methods as they are
-                        default:
-                            outputFile.Add(mds.ToString());
-                            break;
-                    }
+                        var methodName = mds.Identifier.ValueText;
+                        var methodBody = mds.Body?.ToString();
+                        if (string.IsNullOrWhiteSpace(methodName)) continue;
+                        if (methodBody == null) continue;
 
-                    break;
-                }
-                case PropertyDeclarationSyntax { Identifier.ValueText: "Configuration" }:
-                    continue;
-                default:
-                {
-                    if (ds is not ConstructorDeclarationSyntax)
+                        switch (methodName)
+                        {
+                            case ConfigureServicesMethodName:
+                                methodBody = methodBody.Replace("services", "builder.Services")
+                                    .Replace("Configuration", "builder.Configuration").TrimStart('{').TrimEnd('}');
+                                outputFile.Add(methodBody);
+                                break;
+                            case ConfigureMethodName:
+                                outputFile.Add("var app = builder.Build();");
+                                outputFile.Add(methodBody.Replace("env.", "app.Environment.").TrimStart('{')
+                                    .TrimEnd('}'));
+                                outputFile.Add("app.Run();");
+                                break;
+                            //Copy all the remaining methods as they are
+                            default:
+                                outputFile.Add(mds.ToString());
+                                break;
+                        }
+
+                        break;
+                    }
+                    case PropertyDeclarationSyntax { Identifier.ValueText: "Configuration" }:
+                        continue;
+                    default:
                     {
-                        outputFile.Add(ds.ToString());
-                    }
+                        if (ds is not ConstructorDeclarationSyntax)
+                        {
+                            outputFile.Add(ds.ToString());
+                        }
 
-                    break;
+                        break;
+                    }
                 }
             }
+
+            // Copy the rest of the file
+            outputFile.AddRange(nds.Members.RemoveAt(nds.Members.IndexOf(startupClassDs)).Select(ds => ds.ToString()));
+
+            //Write the output file
+            File.WriteAllLines($"{outputFilePath}/{OutputFileName}", outputFile);
+            return true;
         }
-
-        // Copy the rest of the file
-        outputFile.AddRange(nds.Members.RemoveAt(nds.Members.IndexOf(startupClassDs)).Select(ds => ds.ToString()));
-
-        //Write the output file
-        File.WriteAllLines($"{outputFilePath}/{OutputFileName}", outputFile);
-        return true;
+        catch (UnauthorizedAccessException e)
+        {
+            Console.Error.WriteLine($"The user has no permission to write in the output file path {outputFilePath}.");
+            return false;
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"Unexpected error: {e.Message}");
+            return false;
+        }
     }
 }

@@ -27,7 +27,7 @@ outputFilePathOption.AddValidator(result =>
     }
 });
 
-var rootCommand = new RootCommand("Tool to generate DotnetMinimal hosting model.");
+var rootCommand = new RootCommand("Tool to generate a new 'Program.cs' with the dotnet minimal hosting model.");
 var transformCommand = new Command("transform", "Transform the startup.cs file")
 {
     startupFileOption,
@@ -37,6 +37,21 @@ transformCommand.SetHandler((context) =>
 {
     var startupFile = context.ParseResult.GetValueForOption(startupFileOption);
     var outputFilePath = context.ParseResult.GetValueForOption(outputFilePathOption);
+    
+    if (startupFile == null)
+    {
+        Console.Error.WriteLine("Please specify a startup file.");
+        context.ExitCode = 1;
+        return;
+    }
+
+    if (outputFilePath == null)
+    {
+        Console.Error.WriteLine("Please specify a output file path.");
+        context.ExitCode = 1;
+        return;
+    }
+    
     var isSuccess = FileTransformer.TransformFile(startupFile!, outputFilePath!);
     
     if (isSuccess)

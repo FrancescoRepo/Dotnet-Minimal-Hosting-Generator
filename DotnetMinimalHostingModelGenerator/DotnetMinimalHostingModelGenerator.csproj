@@ -17,6 +17,8 @@
         <Copyright>Copyright (c) 2024 Francesco Colaianni</Copyright>
         <PackageLicenseUrl>https://github.com/FrancescoRepo/Dotnet-Minimal-Hosting-Generator/blob/master/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/FrancescoRepo/Dotnet-Minimal-Hosting-Generator</RepositoryUrl>
+        <Product>Minimal-Hosting-Model-Generator</Product>
+        <AssemblyVersion>0.1.0</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>
