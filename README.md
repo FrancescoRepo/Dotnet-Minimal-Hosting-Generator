@@ -1,6 +1,5 @@
-
 ### **Dotnet Minimal Hosting Model Generator**
-
+[![NuGet](https://img.shields.io/nuget/v/MinimalHMGenerator?style=flat&color=green)](https://www.nuget.org/packages/MinimalHMGenerator)
 ---
 
 #### **Description**
